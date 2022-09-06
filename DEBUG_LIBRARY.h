@@ -4,14 +4,16 @@
 #include <stdio.h>
 
 
-/* ---- Global Debug Switch ---- */
 
-#define GENERAL_DEBUG
+/* ---- Global Debug Switch 全局打印调试开关 ---- */
 
-  /*-- Simple style just Base on printf --*/
-#define DEBUG_Simple_FUNCTION
-#define DEBUG_Professional_FUNCTION
+#define GENERAL_DEBUG	// 总开关
 
+/*-- Simple style just Base on printf --*/
+#define DEBUG_Simple_FUNCTION		// 简易的Debug函数 高性能
+#define DEBUG_Professional_FUNCTION	// 专业的Debug函数 功能更强但资源开销更多
+
+/* ---- 各个模块的日志输出的开关 ---- */
 #define ALL_FACTORY_LOG
 #define ALL_SURFER_LOG
 #define ALL_TVSH_LOG
@@ -20,12 +22,14 @@
 #define ALL_GWIN_LOG
 #define ALL_PIE_LOG
 
+
+
+/* ---- Global Switch debug funciton Option ---- */
+
 typedef enum{ 
   DEBUG_OFF = 0,
   DEBUG_ON,
-}SWITCH_DEBUG_EN;
-
-/* ---- Global Debug Switch End ---- */
+}SWITCH_DEBUG_EN;	// Swtich Debug 函数的开关枚举
 
 
 /* ---- Print tools ---- */
@@ -39,11 +43,11 @@ typedef enum{
 #endif
 
 #if defined (print_1) 
-#define log_print print_1
+#define log_print print_1		
 #define log_file 
 #elif defined (print_2)
 #define log_pirnt print_2
-#define log_file stderr,
+#define log_file stderr,		// 指定Log输出路径
 #endif
 
 
@@ -54,6 +58,8 @@ typedef enum{
 #define BOOL_COMP(val, true, false)  ((val)==(true) ? (#val " = " #true) : \
 			((val)==(false) ? (#val " = " #false) : (#val " = other") ))
 			
+
+/* ---- SWITCH 字符输出 ---- */
 #define STR_SWITCH(val, switch_debug_en) \
 		char *const str_switch_p_ = #val; \
 		int str_switch_en_ = switch_debug_en
@@ -62,11 +68,11 @@ typedef enum{
 		if(str_switch_en_) log_print (log_file "[%s] switch(%s) to %s:\n", \
 		__FUNCTION__, str_switch_p_, #val); }while(0)
 
+
+
 #if defined(DEBUG_Simple_FUNCTION)
+
   /*-- Switch printf Debug Integer only --*/
-#define SWITCH_CASE(case_val) case (case_val): \
-				log_print(log_file "[DEBUG] (%s): %s = %s[%d] .\n", __FUNCTION__, \
-				_var_str, #case_val, case_val);	break
 
 #define SWITCH_START(switch_val, case_val, switch_debug_en) do{	\
 		char const *_var_str = #switch_val;	\
@@ -74,10 +80,16 @@ typedef enum{
 		if (!switch_debug_en) break;	\
 		switch (switch_val)	{	SWITCH_CASE(case_val)
 
+#define SWITCH_CASE(case_val) case (case_val): \
+				log_print(log_file "[DEBUG] (%s): %s = %s[%d] .\n", __FUNCTION__, \
+				_var_str, #case_val, case_val);	break
+
 #define SWITCH_END(case_val) SWITCH_CASE(case_val); default: log_print\
 		(log_file "[DEBUG] (%s): %s[%d] = other.\n", __FUNCTION__, _var_str, _val); }	\
 		}while(0)
+
 #elif defined(DEBUG_Professional_FUNCTION)
+
   /*--- Switch printf Debug ---*/
 #define SWITCH_START(switch_val, case_val, switch_debug_en) do{	\
 		char const *_var_str = #switch_val;	\
@@ -93,7 +105,11 @@ typedef enum{
  		} else { log_print	(log_file \
  		"[DEBUG] (%s): %s[%d] = other.\n", __FUNCTION__, _var_str, _val); }	\
 		}while(0)
+
 #endif
+
+
+/* ---- 检查返回值 ---- */
 
 #if defined(DEBUG_Simple_FUNCTION)
 #define CHECK_RET(ret, min, max)  ( int __flg__=0, _temp_ = ret;\
@@ -114,18 +130,22 @@ typedef enum{
 		__flg__; })
 #endif
 
+
+/* ---- 带标签的Debug输出 ---- */
+
 #if defined(DEBUG_Simple_FUNCTION)
-#define DEBUG_POSITION(info) do{ \
+#define DEBUG_TAG(info) do{ \
 		log_print (log_file "[DEBUG] (%s):in file[%s] line[%d]" \
 		"-- %s.\n", info, __FILE__, __LINE__, __FUNCTION__); \
 		}while(0)
 #elif defined(DEBUG_Professional_FUNCTION)
-#define DEBUG_POSITION(info, arg...) do{ char _buf_[128]={0}; \
+#define DEBUG_TAG(info, arg...) do{ char _buf_[128]={0}; \
 		snprintf (_buf_, sizeof(_buf_),   info, ##arg); \
 		log_print (log_file "[DEBUG] (%s):in file[%s] line[%d]" \
 		"-- %s.\n", _buf_, __FILE__, __LINE__, __FUNCTION__); \
 		}while(0)
 #endif
+
 
 #else	/* ifndef GENERAL_DEBUG */
 
@@ -184,7 +204,7 @@ typedef enum{
 
 #ifdef ALL_FACTORY_LOG
 #define factory_log(fmt, args...) 	general_log(FACTORY, fmt, ##args)
-#define factory_hex_log(addr, size) general_memory_log(FACTORY, addr, size)
+#define factory_hex_log(addr, size) 	general_memory_log(FACTORY, addr, size)
 #else
 #define factory_log(fmt, args...)
 #define factory_hex_log(addr, size) 
